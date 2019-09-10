@@ -26,9 +26,12 @@ class TestDirectAccessModels(TestCase):
     def test_no_direct_access(self):
         instance = ProtectedAccessModel()
         self.assertEqual(instance.status, 'new')
+
         def try_change():
             instance.status = 'change'
+
         self.assertRaises(AttributeError, try_change)
+
         instance.publish()
         instance.save()
         self.assertEqual(instance.status, 'published')
