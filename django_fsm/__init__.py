@@ -8,10 +8,13 @@ from functools import wraps
 
 from django.db import models
 from django.db.models.signals import class_prepared
-from django.utils.functional import curry
-
 from django_fsm.signals import pre_transition, post_transition
 
+try:
+    from functools import partialmethod
+except ImportError:
+    # python 2.7, so we are on django<=1.11
+    from django.utils.functional import curry as partialmethod
 
 try:
     from django.apps import apps as django_apps
@@ -423,11 +426,11 @@ class FSMFieldMixin(object):
         super(FSMFieldMixin, self).contribute_to_class(cls, name, **kwargs)
         setattr(cls, self.name, self.descriptor_class(self))
         setattr(cls, 'get_all_{0}_transitions'.format(self.name),
-                curry(get_all_FIELD_transitions, field=self))
+                partialmethod(get_all_FIELD_transitions, field=self))
         setattr(cls, 'get_available_{0}_transitions'.format(self.name),
-                curry(get_available_FIELD_transitions, field=self))
+                partialmethod(get_available_FIELD_transitions, field=self))
         setattr(cls, 'get_available_user_{0}_transitions'.format(self.name),
-                curry(get_available_user_FIELD_transitions, field=self))
+                partialmethod(get_available_user_FIELD_transitions, field=self))
 
         if self.protected:
             if hasattr(self.base_cls, 'refresh_from_db'):  # check for Django prior to v1.8
